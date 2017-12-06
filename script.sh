@@ -1,7 +1,7 @@
 #!/bin/bash
 #----------------------
 # Name : script.sh
-# Authors : Cloé Depardon, Etienne Blanc-Coquand, Paul-Edouard Boudier
+# Authors : Cloé Depardon, Etienne Blanc-Coquand, Paul-Edouard Boudier and Thibault Hamnache
 # Utilities : Script that allows you to create and customize a Wordpress.
 # Creation date : 05/12/2017
 #----------------------
