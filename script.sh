@@ -22,30 +22,29 @@
 #----------------------
 # THEMES
 #----------------------
+
+# Add a theme to Wordpress
 function addTheme {
     cd /var/www/html/
     wp theme install $1
     echo "Thème installé."
 }
 
+# Delete a theme
 function deleteTheme {
     cd /var/www/html/
     wp theme delete $1
     echo "Thème supprimé."
 }
 
+# Enable a theme
 function enableTheme {
     cd /var/www/html/
     wp theme activate $1
     echo "Thème activé."
 }
 
-function disableTheme {
-    cd /var/www/html/
-    wp theme disable $1
-    echo "Thème désactivé."
-}
-
+# Search a theme
 function searchTheme {
     cd /var/www/html/
     echo "Résultats pour $1"
@@ -55,36 +54,43 @@ function searchTheme {
 #----------------------
 # PLUGINS
 #----------------------
+
+# Add a plugin to Wordpress
 function addPlugin {
     cd /var/www/html/
     wp plugin install $1
     echo "Plugin installé."
 }
 
+# Delete a plugin
 function deletePlugin {
     cd /var/www/html/
     wp plugin delete $1
     echo "Plugin supprimé."
 }
 
+# Enable a plugin
 function enablePlugin {
     cd /var/www/html/
     wp plugin activate $1
     echo "Plugin activé."
 }
 
+# Disable a plugin
 function disablePlugin {
     cd /var/www/html/
     wp plugin deactivate $1
     echo "Plugin désactivé."
 }
 
+# Search a plugin
 function searchPlugin {
     cd /var/www/html/
     echo "Résultats pour $1"
     wp plugin search $1 --fields=name,version,slug,rating,num_ratings
 }
 
+# Reset Wordpress site configuration values
 function reset {
     cd /var/www/html/
     wp db reset --yes
@@ -93,14 +99,19 @@ function reset {
 #----------------------
 # INSTALLATION
 #----------------------
+
+# Installs all required packages, creates the database, user configurable or
+# automatically configures the site and Wordpress database.
 function setup {
-    echo "Vérification des paquets requis et installation de ceux manquants"
     export DEBIAN_FRONTEND="noninteractive"
+    echo "Vérification des paquets requis et installation de ceux manquants"
+    # Sets MySQL password to 0000 without asking the user for it
     sudo debconf-set-selections <<< "mysql-server mysql-server/root_password password 0000"
     sudo debconf-set-selections <<< "mysql-server mysql-server/root_password_again password 0000"
     sudo apt-get install -y mysql-server
     sudo apt-get install -y apache2 php7.0 php7.0-mysql libapache2-mod-php7.0
     sudo a2enmod rewrite
+    # Executes an SQL command
     mysql -uroot -p0000 -e "
       CREATE DATABASE wordpress;
       USE wordpress;
@@ -116,8 +127,10 @@ function setup {
     echo "Connexion à la base de données :"
     echo "Nom de la base de données (default : wordpress):"
     read -e dbName
+    # Checks whether the input value is null
     if [ -z "$dbName" ]
     then
+        # Put a default value
         dbName="wordpress"
     fi
     echo "Utilisateur de la base de données (default : root):"
@@ -163,17 +176,24 @@ function setup {
     then
         wpMail="admin@admin.com"
     fi
+    # Configuring Wordpress
     wp config create --dbname=${dbName} --dbuser=${dbUser} --dbpass=${dbPwd}
+    # Configuration of the Wordpress website
     wp core install --url=${wpUrl} --title=${wpTitle} --admin_user=${wpUser} --admin_password=${wpPwd} --admin_email=${wpMail} --skip-email
     sudo service apache2 restart
     echo "Votre site $wpTitle a bien été installé."
     echo "Nom d'utilisateur par défaut pour la base de données = root; Mot de passe pour la base de données = 0000"
 }
 
-# Main menu
+#----------------------
+# MENUS
+#----------------------
+
+# Displays the menu and submenus for all interactions with the Wordpress site.
 function menu {
+    # Options lists
     options=("Installation" "Thèmes" "Plugins" "Reset" "Quitter")
-    optionsThemes=("Ajouter" "Supprimer" "Activer" "Désactiver" "Rechercher" "Quitter")
+    optionsThemes=("Ajouter" "Supprimer" "Activer" "Rechercher" "Quitter")
     optionsPlugins=("Ajouter" "Supprimer" "Activer" "Désactiver" "Rechercher" "Quitter")
     choiceTheme=""
     choicePlugin=""
@@ -217,7 +237,6 @@ function menu {
                 Ajouter ) choiceTheme="Ajouter";break;;
                 Supprimer ) choiceTheme="Supprimer";break;;
                 Activer ) choiceTheme="Activer";break;;
-                Désactiver ) choiceTheme="Désactiver";break;;
                 Rechercher ) choiceTheme="Rechercher";break;;
                 Quitter ) choiceTheme="Quitter";break;;
             esac
@@ -257,16 +276,6 @@ function menu {
             echo "PS: L'écrire sans majuscule et sans espace, se référer au slug avec l'option de recherche"
             read -e themeName
             enableTheme ${themeName}
-            menu
-        fi
-
-        # Disable theme action
-        if [ "$choiceTheme" == "Désactiver" ]
-        then
-            echo "Le nom du thème à désactiver :"
-            echo "PS: L'écrire sans majuscule et sans espace, se référer au slug avec l'option de recherche"
-            read -e themeName
-            disableTheme ${themeName}
             menu
         fi
 
