@@ -95,9 +95,16 @@ function reset {
 #----------------------
 function setup {
     echo "Vérification des paquets requis et installation de ceux manquants"
-    sudo apt-get install -Y mysql-server apache2 php7.0 php7.0-mysql libapache2-mod-php7.0
+    export DEBIAN_FRONTEND="noninteractive"
+    sudo debconf-set-selections <<< "mysql-server mysql-server/root_password password 0000"
+    sudo debconf-set-selections <<< "mysql-server mysql-server/root_password_again password 0000"
+    sudo apt-get install -y mysql-server
+    sudo apt-get install -y apache2 php7.0 php7.0-mysql libapache2-mod-php7.0
     sudo a2enmod rewrite
-    #TODO : Add SQL query to create the wordpress database
+    mysql -uroot -p0000 -e "
+      CREATE DATABASE wordpress;
+      USE wordpress;
+      exit;"
     cd /var/www/html/
     sudo rm -rf index.html
     curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
@@ -160,6 +167,7 @@ function setup {
     wp core install --url=${wpUrl} --title=${wpTitle} --admin_user=${wpUser} --admin_password=${wpPwd} --admin_email=${wpMail} --skip-email
     sudo service apache2 restart
     echo "Votre site $wpTitle a bien été installé."
+    echo "Nom d'utilisateur par défaut pour la base de données = root; Mot de passe pour la base de données = 0000"
 }
 
 # Main menu
