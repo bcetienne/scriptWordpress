@@ -107,23 +107,55 @@ function setup {
     echo "Fin du téléchargement et de l'installation des composants requis..."
     echo "Configuration de Wordpress"
     echo "Connexion à la base de données :"
-    echo "Nom de la base de données :"
+    echo "Nom de la base de données (default : wordpress):"
     read -e dbName
-    echo "Utilisateur de la base de données :"
+    if [ -z "$dbName" ]
+    then
+        dbName="wordpress"
+    fi
+    echo "Utilisateur de la base de données (default : root):"
     read -e dbUser
-    echo "Mot de passe :"
+        if [ -z "$dbUser" ]
+    then
+        dbUser="root"
+    fi
+    echo "Mot de passe (default : 0000):"
     read -s dbPwd
+        if [ -z "$dbPwd" ]
+    then
+        dbPwd="0000"
+    fi
     echo "Configuration du site Wordpress"
-    echo "Adresse du site :"
+    echo "Adresse du site (default : 192.168.33.10):"
     read -e wpUrl
+        if [ -z "$wpUrl" ]
+    then
+        wpUrl="192.168.33.10"
+    fi
     echo "Nom du site :"
     read -e wpTitle
-    echo "Identifiant administrateur :"
+        if [ -z "$wpTitle" ]
+    then
+        wpTitle="Blog"
+    fi
+    echo "Identifiant administrateur (default : root):"
     read -e wpUser
-    echo "Mot de passe administrateur :"
+        if [ -z "$wpUser" ]
+    then
+        wpUser="root"
+    fi
+    echo "Mot de passe administrateur (default : 0000):"
     read -s wpPwd
-    echo "Adresse mail de l'administrateur :"
+        if [ -z "$wpPwd" ]
+    then
+        wpPwd="0000"
+    fi
+    echo "Adresse mail de l'administrateur (default : admin@admin.com):"
     read -e wpMail
+        if [ -z "$wpMail" ]
+    then
+        wpMail="admin@admin.com"
+    fi
     wp config create --dbname=${dbName} --dbuser=${dbUser} --dbpass=${dbPwd}
     wp core install --url=${wpUrl} --title=${wpTitle} --admin_user=${wpUser} --admin_password=${wpPwd} --admin_email=${wpMail} --skip-email
     sudo service apache2 restart
